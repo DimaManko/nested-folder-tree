@@ -40,16 +40,7 @@ export function MainPage() {
     return (
       <Folder name={name}>
         {Object.entries(node.children).map(([name, item]) => {
-          if (item.type === "folder") {
-            const result = renderItems(item, name);
-            return (
-              <Folder name={name} key={name}>
-                {result}
-              </Folder>
-            );
-          } else {
-            return <File name={name} key={name} />;
-          }
+          return renderItems(item, name);
         })}
       </Folder>
     );
