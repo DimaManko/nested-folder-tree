@@ -1,7 +1,7 @@
-import { MainPage } from "./pages/MainPage";
+import { FolderList } from "./components/FolderList";
 
 function App() {
-  return <MainPage />;
+  return <FolderList />;
 }
 
 export default App;

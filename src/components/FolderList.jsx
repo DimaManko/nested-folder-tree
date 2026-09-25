@@ -4,12 +4,9 @@ import { useHttp } from "../hooks/useHttp";
 import { File } from "../components/File";
 import { Folder } from "../components/Folder";
 
-import { ErrorMessage } from "../UI/ErrorMessage";
-import { Spinner } from "../UI/Spinner";
-
 const URL = `http://localhost:3000/root`;
 
-export function MainPage() {
+export function FolderList() {
   const [data, setData] = useState(null);
 
   const { loading, error, request } = useHttp();
@@ -30,7 +27,7 @@ export function MainPage() {
     }
 
     if (node.type === "file") {
-      return <File name={name} />;
+      return <File name={name} key={name} />;
     }
 
     if (Object.entries(node.children).length === 0) {
@@ -38,7 +35,7 @@ export function MainPage() {
     }
 
     return (
-      <Folder name={name}>
+      <Folder name={name} key={name}>
         {Object.entries(node.children).map(([name, item]) => {
           return renderItems(item, name);
         })}
@@ -47,18 +44,38 @@ export function MainPage() {
   }
 
   if (loading) {
-    return <Spinner />;
+    return (
+      <div className="tree-card">
+        <div className="tree-status">
+          <span className="tree-spinner" />
+          Loading…
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <ErrorMessage />;
+    return (
+      <div className="tree-card">
+        <div className="tree-error">⚠️ Failed to load data</div>
+      </div>
+    );
   }
 
   if (!data) {
-    return <ErrorMessage />;
+    return (
+      <div className="tree-card">
+        <div className="tree-error">⚠️ No data</div>
+      </div>
+    );
   }
 
   const items = renderItems(data);
 
-  return <ul>{items}</ul>;
+  return (
+    <div className="tree-card">
+      <h1>📂 File Structure</h1>
+      <ul className="tree-root">{items}</ul>
+    </div>
+  );
 }
