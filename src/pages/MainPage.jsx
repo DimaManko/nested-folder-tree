@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { useHttp } from "../hooks/useHttp";
 
 import { File } from "../components/File";
+import { Folder } from "../components/Folder";
+
+import { ErrorMessage } from "../UI/ErrorMessage";
+import { Spinner } from "../UI/Spinner";
 
 const URL = `http://localhost:3000/root`;
 
@@ -18,16 +22,52 @@ export function MainPage() {
     initialFetchData();
   }, []);
 
-  function renderItems(item) {
-    if (item.type === "file") {
-      return <File item={item} />;
-    }
-
-    if (item.children) {
-      return Object.entries(item.children).map((child) => {
-        return renderItems(child[1]);
+  function renderItems(node, name = null) {
+    if (!node.type) {
+      return Object.entries(node).map(([name, item]) => {
+        return renderItems(item, name);
       });
     }
+
+    if (node.type === "file") {
+      return <File name={name} />;
+    }
+
+    if (Object.entries(node.children).length === 0) {
+      return <Folder name={name} />;
+    }
+
+    return (
+      <Folder name={name}>
+        {Object.entries(node.children).map(([name, item]) => {
+          if (item.type === "folder") {
+            const result = renderItems(item, name);
+            return (
+              <Folder name={name} key={name}>
+                {result}
+              </Folder>
+            );
+          } else {
+            return <File name={name} key={name} />;
+          }
+        })}
+      </Folder>
+    );
   }
-  console.log(data);
+
+  if (loading) {
+    return <Spinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage />;
+  }
+
+  if (!data) {
+    return <ErrorMessage />;
+  }
+
+  const items = renderItems(data);
+
+  return <ul>{items}</ul>;
 }
