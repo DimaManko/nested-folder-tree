@@ -6,6 +6,30 @@ import { Folder } from "../components/Folder";
 
 const URL = `http://localhost:3000/root`;
 
+function renderItems(node, name = null) {
+  if (!node.type) {
+    return Object.entries(node).map(([name, item]) => {
+      return renderItems(item, name);
+    });
+  }
+
+  if (node.type === "file") {
+    return <File name={name} key={name} />;
+  }
+
+  if (Object.entries(node.children).length === 0) {
+    return <Folder name={name} key={name} />;
+  }
+
+  return (
+    <Folder name={name} key={name}>
+      {Object.entries(node.children).map(([name, item]) => {
+        return renderItems(item, name);
+      })}
+    </Folder>
+  );
+}
+
 export function FolderList() {
   const [data, setData] = useState(null);
 
@@ -13,35 +37,12 @@ export function FolderList() {
 
   useEffect(() => {
     const initialFetchData = async () => {
-      const data = await request(URL);
-      setData(data);
+      const response = await request(URL);
+
+      setData(response);
     };
-    initialFetchData();
+    initialFetchData().catch(() => {});
   }, []);
-
-  function renderItems(node, name = null) {
-    if (!node.type) {
-      return Object.entries(node).map(([name, item]) => {
-        return renderItems(item, name);
-      });
-    }
-
-    if (node.type === "file") {
-      return <File name={name} key={name} />;
-    }
-
-    if (Object.entries(node.children).length === 0) {
-      return <Folder name={name} />;
-    }
-
-    return (
-      <Folder name={name} key={name}>
-        {Object.entries(node.children).map(([name, item]) => {
-          return renderItems(item, name);
-        })}
-      </Folder>
-    );
-  }
 
   if (loading) {
     return (
